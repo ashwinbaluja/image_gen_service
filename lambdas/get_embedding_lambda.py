@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 import base64
+from decimal import Decimal
 
 sagemaker = boto3.client('sagemaker-runtime')
 s3 = boto3.client('s3')
@@ -26,8 +27,7 @@ def lambda_handler(event, context):
                 'statusCode': 200,
                 'body': json.dumps({
                     'embedding_id': embedding_id,
-                    'embedding': response['Item']['embedding'],
-                    'source': 'cache'
+                    'embedding': [float(x) for x in response['Item']['embedding']],
                 })
             }
 
@@ -64,13 +64,12 @@ def lambda_handler(event, context):
         )
 
         response_body = json.loads(sagemaker_response['Body'].read().decode())
-        embedding = response_body['embedding']
+        embedding = [Decimal(x) for x in response_body['embedding']]
 
         embeddings_table.put_item(
             Item={
                 'embedding_id': embedding_id,
                 'embedding': embedding,
-                'created_at': image_response['Item'].get('created_at', '')
             }
         )
 
@@ -78,8 +77,7 @@ def lambda_handler(event, context):
             'statusCode': 200,
             'body': json.dumps({
                 'embedding_id': embedding_id,
-                'embedding': embedding,
-                'source': 'generated'
+                'embedding': [float(x) for x in embedding],
             })
         }
 
