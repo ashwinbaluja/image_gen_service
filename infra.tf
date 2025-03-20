@@ -102,7 +102,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "dynamodb:PutItem",
           "dynamodb:UpdateItem",
           "dynamodb:Query",
-          "dynamodb:Scan"
+          "dynamodb:Scan",
+          "dynamodb:BatchGetItem"
         ],
         Resource = [
           aws_dynamodb_table.images_table.arn,
@@ -379,7 +380,7 @@ resource "aws_lambda_permission" "api_gateway_permission" {
     aws_lambda_function.find_similar_image.function_name,
   ], count.index)
   principal  = "apigateway.amazonaws.com"
-  source_arn = "${aws_api_gateway_rest_api.image_service_api.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_rest_api.image_service_api.execution_arn}/*"
 }
 
 resource "aws_api_gateway_deployment" "image_service_deployment" {

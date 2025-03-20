@@ -52,7 +52,7 @@ def lambda_handler(event, context):
                 })
             }
         else:
-            query_embedding = response['Item']['embedding']
+            query_embedding = [float(x) for x in response['Item']['embedding']]
 
         images_table = dynamodb.Table(IMAGES_TABLE)
 
@@ -86,7 +86,7 @@ def lambda_handler(event, context):
 
         for item in embeddings_response:
             if 'embedding' in item:
-                sims[item['image_id']] = cosine_similarity(query_embedding, item['embedding'])
+                sims[item['embedding_id']] = cosine_similarity(query_embedding, [float(x) for x in item['embedding']])
 
         sims = sorted([(k, v) for (k, v) in sims.items()], key=lambda x: x[1], reverse=True)
 
