@@ -39,3 +39,4 @@ terraform.rc
 lambda_functions/
 clip-model.tar.gz
 sagemaker/model
+.DS_STORE
