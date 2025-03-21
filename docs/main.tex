@@ -111,7 +111,7 @@ The service uses a primarily serverless architecture:
 \label{tab:api_summary}
 \end{table}
 
-\noindent Detailed endpoint descriptions and sequence diagrams are provided below.
+\noindent Detailed endpoint descriptions and sequence diagrams are provided below. All endpoints return a 500 in server errors, 200 in success. Additional error codes noted in process diagrams.
 
 \subsection{GET /images}
 Generates a new image from a text prompt using AWS Bedrock. Saves the image to S3 and writes metadata to DynamoDB. Appends random camera angle and style modifiers to the prompt.
@@ -255,5 +255,13 @@ The service uses two DynamoDB tables: `Images' and `Embeddings'. A Global Second
     \caption{DynamoDB Schema and Relationships}
     \label{fig:schema}
 \end{figure}
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{uml/schemas.png} % Smaller image
+%     \caption{DynamoDB Schema and Relationships}
+%     \label{fig:schema}
+% \end{figure}
+
 
 \end{document}
