@@ -1,0 +1,36 @@
+@startuml
+title "GET /images: Generate Images"
+
+actor User
+participant "API Gateway" as APIGW
+participant "generate_images Lambda" as GenLambda
+participant "AWS Bedrock" as Bedrock
+participant "S3" as S3
+participant "DynamoDB" as DynamoDB
+
+User -> APIGW : GET /images?prompt=...
+activate APIGW
+APIGW -> GenLambda : Invoke
+activate GenLambda
+
+GenLambda -> GenLambda: Choose random angle and style
+GenLambda -> Bedrock : invoke_model(prompt, angle, style)
+activate Bedrock
+Bedrock --> GenLambda : Generated Image (base64)
+deactivate Bedrock
+
+GenLambda -> S3 : put_object(image_data)
+activate S3
+S3 --> GenLambda : Success
+deactivate S3
+
+GenLambda -> DynamoDB : put_item(image_id, prompt, s3_key, embedding_id)
+activate DynamoDB
+DynamoDB --> GenLambda : Success
+deactivate DynamoDB
+
+GenLambda --> APIGW : {image_id, base_prompt, modified_prompt}
+deactivate GenLambda
+APIGW --> User : {image_id, base_prompt, modified_prompt}
+deactivate APIGW
+@enduml

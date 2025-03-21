@@ -1,0 +1,53 @@
+@startuml
+title "GET /embeddings/{embedding_id}: Retrieve or Generate Embedding"
+
+actor User
+participant "API Gateway" as APIGW
+participant "get_embedding Lambda" as GetEmbedLambda
+participant "DynamoDB" as DynamoDB
+participant "S3" as S3
+participant "SageMaker" as SageMaker
+
+User -> APIGW : GET /embeddings/{embedding_id}
+activate APIGW
+APIGW -> GetEmbedLambda : Invoke
+activate GetEmbedLambda
+
+GetEmbedLambda -> DynamoDB : get_item(embedding_id) from Embeddings
+activate DynamoDB
+DynamoDB --> GetEmbedLambda : Embedding (or Not Found)
+deactivate DynamoDB
+
+alt Embedding Found
+    GetEmbedLambda --> APIGW : {embedding_id, embedding}
+else Embedding Not Found
+    GetEmbedLambda -> DynamoDB: get_item(image_id) from Images
+     activate DynamoDB
+    DynamoDB --> GetEmbedLambda: image data (or not found)
+     deactivate DynamoDB
+     alt Image Found
+        GetEmbedLambda -> S3 : get_object(s3_key)
+        activate S3
+        S3 --> GetEmbedLambda : Image Data
+        deactivate S3
+
+        GetEmbedLambda -> SageMaker : invoke_endpoint(image_data)
+        activate SageMaker
+        SageMaker --> GetEmbedLambda : Embedding
+        deactivate SageMaker
+
+        GetEmbedLambda -> DynamoDB : put_item(embedding_id, embedding) to Embeddings
+        activate DynamoDB
+        DynamoDB --> GetEmbedLambda: Success
+        deactivate DynamoDB
+        GetEmbedLambda --> APIGW : {embedding_id, embedding}
+    else Image Not Found
+        GetEmbedLambda -> APIGW: 404 Image Not Found
+    end
+end
+
+APIGW --> User : Response
+deactivate APIGW
+deactivate GetEmbedLambda
+
+@enduml

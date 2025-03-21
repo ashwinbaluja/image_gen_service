@@ -1,0 +1,33 @@
+@startuml
+
+class Images {
+  +image_id : String <<PK>>
+  --
+  created_at : String
+  modified_prompt : String
+  prompt : String
+  s3_key : String
+}
+
+class Embeddings {
+    +embedding_id : String <<PK>>
+    --
+    embedding : List<Decimal>
+}
+
+class Images_Prompt_GSI [[Images_Prompt_GSI]] {
+  +prompt : String <<PK>>
+  --
+   image_id : String
+   created_at : String
+   modified_prompt : String
+   s3_key : String
+}
+note right of Images_Prompt_GSI : **GSI (View)**\nProjects all attributes
+
+Images::image_id -- Embeddings::embedding_id : 1-to-1
+
+Images::prompt -- Images_Prompt_GSI::prompt
+
+left to right direction
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+title "GET /similarity: Find Similar Images"
+
+actor User
+participant "API Gateway" as APIGW
+participant "find_similar_images Lambda" as FindSimilarLambda
+participant "DynamoDB" as DynamoDB
+
+User -> APIGW : GET /similarity?image_id=...&prompt=...
+activate APIGW
+APIGW -> FindSimilarLambda : Invoke
+activate FindSimilarLambda
+
+FindSimilarLambda -> DynamoDB : get_item(embedding_id) from Embeddings
+activate DynamoDB
+DynamoDB --> FindSimilarLambda : Query Embedding (or Not Found)
+deactivate DynamoDB
+
+alt Query Embedding Found
+    FindSimilarLambda -> DynamoDB : query(prompt) using GSI from Images
+    activate DynamoDB
+    DynamoDB --> FindSimilarLambda : List of Image Items
+    deactivate DynamoDB
+        FindSimilarLambda -> DynamoDB : batch_get_item(embedding_ids) from Embeddings
+        activate DynamoDB
+        DynamoDB -> FindSimilarLambda: Embeddings for the Images
+        deactivate DynamoDB
+    FindSimilarLambda -> FindSimilarLambda : Calculate Cosine Similarities
+    FindSimilarLambda -> FindSimilarLambda : Sort by Similarity
+    FindSimilarLambda --> APIGW : [{image_id, similarity}, ...]
+else Query Embedding Not Found
+    FindSimilarLambda --> APIGW : 404 Not Found
+end
+
+APIGW --> User : Response
+deactivate APIGW
+deactivate FindSimilarLambda
+
+@enduml

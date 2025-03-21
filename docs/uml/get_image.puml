@@ -1,0 +1,34 @@
+@startuml
+title "GET /images/{image_id}: Retrieve Image"
+
+actor User
+participant "API Gateway" as APIGW
+participant "get_image Lambda" as GetLambda
+participant "DynamoDB" as DynamoDB
+participant "S3" as S3
+
+User -> APIGW : GET /images/{image_id}
+activate APIGW
+APIGW -> GetLambda : Invoke
+activate GetLambda
+
+GetLambda -> DynamoDB : get_item(image_id)
+activate DynamoDB
+DynamoDB --> GetLambda : Image Metadata (or Not Found)
+deactivate DynamoDB
+
+alt Image Found
+    GetLambda -> S3 : generate_presigned_url(s3_key)
+    activate S3
+    S3 --> GetLambda : Image URL
+    deactivate S3
+    GetLambda --> APIGW : {image_id, prompt, ..., url}
+else Image Not Found
+    GetLambda --> APIGW : 404 Not Found
+end
+
+APIGW --> User : Response
+deactivate APIGW
+deactivate GetLambda
+
+@enduml

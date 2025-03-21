@@ -1,0 +1,32 @@
+@startuml
+title "POST /images: Upload Image"
+
+actor User
+participant "API Gateway" as APIGW
+participant "upload_image Lambda" as UploadLambda
+participant "S3" as S3
+participant "DynamoDB" as DynamoDB
+
+User -> APIGW : POST /images  {image_data: base64}
+activate APIGW
+APIGW -> UploadLambda : Invoke
+activate UploadLambda
+
+UploadLambda -> UploadLambda: Decode base64 image
+
+UploadLambda -> S3 : put_object(image_data)
+activate S3
+S3 --> UploadLambda : Success
+deactivate S3
+
+UploadLambda -> DynamoDB : put_item(image_id, s3_key, embedding_id)
+activate DynamoDB
+DynamoDB --> UploadLambda : Success
+deactivate DynamoDB
+
+UploadLambda --> APIGW : {image_id}
+deactivate UploadLambda
+APIGW --> User : {image_id}
+deactivate APIGW
+
+@enduml

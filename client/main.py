@@ -1,7 +1,6 @@
 import requests
 import json
 import base64
-from typing import Optional
 
 class ImageServiceClient:
     def __init__(self, api_base_url: str):
@@ -57,11 +56,11 @@ def print_menu():
     print("6. Exit")
 
 def handle_response(response):
-    print("\nResponse:")
+    print()
+    print("Response:")
     print(json.dumps(response, indent=2))
 
 def main():
-    # Default API URL - can be changed during runtime
     api_url = "https://9cz5jvn09c.execute-api.us-east-2.amazonaws.com/prod"
     client = ImageServiceClient(api_url)
 
@@ -88,6 +87,8 @@ def main():
             elif choice == '4':
                 embedding_id = input("Enter embedding ID: ")
                 response = client.get_embedding(embedding_id)
+                if "embedding" in response:
+                    response["embedding"] = response["embedding"][:10] + [f"...{len(response['embedding']) - 20} more"] + response["embedding"][-10:]
                 handle_response(response)
 
             elif choice == '5':
