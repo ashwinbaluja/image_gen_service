@@ -85,12 +85,14 @@ The service uses a primarily serverless architecture:
     \item \textbf{Amazon DynamoDB:} Image metadata and embedding database.
 \end{itemize}
 
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.6\textwidth]{uml/schemas.png} % Smaller image
-    \caption{DynamoDB Schema and Relationships}
-    \label{fig:schema}
+    \includegraphics[width=0.6\textwidth]{architecture_diagram.png} % Smaller image
+    \caption{Full AWS architecture diagram}
+    \label{fig:arch}
 \end{figure}
+
 
 \section{API Design}
 
@@ -220,7 +222,7 @@ Finds similar images to a given image. Filters images compared to only images ge
 
 \section{Database Schema}
 
-The service uses two DynamoDB tables: `Images' and `Embeddings'. A Global Secondary Index `Images\_Prompt\_GSI`, allows filtering by prompt. See Fig. \ref{fig:schema}, Table \ref{tab:images_schema}, and Table \ref{tab:embeddings_schema}.
+The service uses two DynamoDB tables: `Images' and `Embeddings'. A Global Secondary Index `Images\_Prompt\_GSI`, allows for filtering by prompt. See Fig. \ref{fig:schema}, Table \ref{tab:images_schema}, and Table \ref{tab:embeddings_schema}.
 
 \begin{centering}
 \begin{tabular}{|l|l|l|}
@@ -247,12 +249,11 @@ The service uses two DynamoDB tables: `Images' and `Embeddings'. A Global Second
 \label{tab:embeddings_schema}
 \end{centering}
 
-% \begin{figure}[h!]
-%     \centering
-%     \includegraphics[width=0.6\textwidth]{uml/schemas.png} % Smaller image
-%     \caption{DynamoDB Schema and Relationships}
-%     \label{fig:schema}
-% \end{figure}
-
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{uml/schemas.png} % Smaller image
+    \caption{DynamoDB Schema and Relationships}
+    \label{fig:schema}
+\end{figure}
 
 \end{document}
